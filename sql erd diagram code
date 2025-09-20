@@ -1,0 +1,42 @@
+-- Teams table
+CREATE TABLE teams (
+    team_id VARCHAR(255) PRIMARY KEY,
+    team_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- Users table
+CREATE TABLE users (
+    user_id VARCHAR(255) PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password_hash TEXT NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('employer', 'employee')),
+    team_id VARCHAR(255) REFERENCES teams(team_id)
+);
+
+-- Goals table (assigned by employer to employee)
+CREATE TABLE goals (
+    goal_id VARCHAR(255) PRIMARY KEY,
+    employer_id VARCHAR(255) REFERENCES users(user_id),
+    employee_id VARCHAR(255) REFERENCES users(user_id),
+    goal_title VARCHAR(255) NOT NULL,
+    due_date DATE,
+    status VARCHAR(50) NOT NULL DEFAULT 'Not Started'
+);
+
+-- Tasks table (linked to goals)
+CREATE TABLE tasks (
+    task_id VARCHAR(255) PRIMARY KEY,
+    goal_id VARCHAR(255) REFERENCES goals(goal_id) ON DELETE CASCADE,
+    task_description TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'To Do'
+);
+
+-- Private Evaluations (viewable only by employers)
+CREATE TABLE evaluations (
+    evaluation_id VARCHAR(255) PRIMARY KEY,
+    employer_id VARCHAR(255) REFERENCES users(user_id),
+    employee_id VARCHAR(255) REFERENCES users(user_id),
+    evaluation_date DATE NOT NULL,
+    rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+    notes TEXT
+);
